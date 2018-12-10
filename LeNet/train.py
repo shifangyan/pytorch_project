@@ -32,10 +32,11 @@ train_loss = 0.0
 train_acc = 0.0
 test_loss = 0.0
 test_acc = 0.0
-num_iter = 0
+num_iter = -1
 recoder = {"num_iter":[],"train_loss":[],"train_acc":[],"test_loss":[],"test_acc":[]}
 for epoch in range(num_epoch):
-    for batch_img,batch_label in train_loader:
+    for index,(batch_img,batch_label) in enumerate(train_loader):
+      #  print index
         num_iter += 1
       #  print type(batch_img)
       #  print type(batch_label)
@@ -47,7 +48,7 @@ for epoch in range(num_epoch):
       #  print batch_label.data.size()
         loss = loss_func(output,batch_label) #计算loss 此loss已经在一个batch_size上做了平均
         #print loss.data.size()  loss输出为一个标量
-        train_loss += loss.data[0]  
+        train_loss += loss.item()  
         max,max_index = torch.max(output,1)  #返回1维度上的最大值 记忆下标
         #print max.size()
         train_correct = torch.sum((max_index.data == batch_label.data))  #统计一个batch中预测正确的数量
@@ -61,14 +62,14 @@ for epoch in range(num_epoch):
 
 
         #显示设置
-        if(num_iter % iter_display == 0 or num_iter == 1):
+        if(num_iter % iter_display == 0):
             print "iter_num:",num_iter
-            if num_iter == 1:
-                k = 1
+            if num_iter == 0:
+                train_loss = train_loss
+                train_acc = float(train_acc)/batch_size
             else:
-                k = iter_display
-            train_loss = train_loss/k
-            train_acc = float(train_acc)/float(k*batch_size)
+                train_loss = train_loss / iter_display
+                train_acc = float(train_acc)/(iter_display*batch_size)
             recoder["num_iter"].append(num_iter)
             recoder["train_loss"].append(train_loss)
             recoder["train_acc"].append(train_acc)
@@ -87,16 +88,19 @@ for epoch in range(num_epoch):
                 lenet_model.eval() #转换成测试模式 仅仅只对dropout层和batchnorm层有影响
                 output = lenet_model(test_batch_img)  #测试前向计算
                 loss = loss_func(output,test_batch_label)
-                test_loss += loss.data[0]
+                test_loss += loss.item()
                 max,max_index = torch.max(output,1)
                 test_correct = torch.sum((max_index.data == test_batch_label.data))
                 test_acc += test_correct
-            test_loss = test_loss/len(test_dataset)
+            test_loss = test_loss/len(test_dataset)*batch_size
             test_acc = float(test_acc)/float(len(test_dataset))
             recoder["test_loss"].append(test_loss)
             recoder["test_acc"].append(test_acc)
             print "test loss:",test_loss
             print "test acc:",test_acc
+
+#存储权重
+torch.save(lenet_model,"./weight/LeNet.weights")
 #绘图
 plt.figure("loss")
 plt.plot(recoder["num_iter"],recoder["train_loss"])

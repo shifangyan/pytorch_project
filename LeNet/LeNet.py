@@ -14,8 +14,8 @@ class LeNet(nn.Module):
         self.conv2 = nn.Conv2d(20,50,5)  #输出：N*50*8*8
         self.pool2 = nn.MaxPool2d(2,2) #输出：N*50*4*4
         self.fc1 = nn.Linear(4*4*50,500)  #线性变换层 即全连接层或内积层 输入之前要把每个样本转换成一维向量 参数为：每个样本的输入大小，每个样本的输出大小,是否学习偏置项(默认开启) 输出：N*500
-        self.dropout = nn.Dropout(0.9)  #dropout层
         self.relu = nn.ReLU()  #非线性激活层   输出：N*500
+        self.dropout = nn.Dropout(0.5)  #dropout层
         #self.sigmoid = nn.Sigmoid()
         self.fc2 = nn.Linear(500,10)  #输出：N*10
     def forward(self,x):
@@ -26,8 +26,8 @@ class LeNet(nn.Module):
         x = self.pool2(x)
         x = x.view(x.size()[0],-1)  #将feaumap map维度进行转换，转换成batch_size*(w*h*channels) 以适应全连接层的要求 
         x = self.fc1(x)
-        x = self.dropout(x)
         x = self.relu(x)
+        x = self.dropout(x)
         #x = self.sigmoid(x)
         x = self.fc2(x)
 
