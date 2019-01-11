@@ -2,11 +2,19 @@
 # coding=utf-8
 
 from torch.utils.data import Dataset
+from torchvision import transforms
+#from image_transforms import *
 import skimage.io as io
 import torch
+#import matplotlib.pyplot as plt
+import os
 
-class MNISTDataset(Dataset):
-    #mnist手写体数据集
+#################################################################
+#此为我的分类数据集pytorch标准读取方式
+#修改时间：2019.1.3
+#修改人员：sfy
+#################################################################
+class GlassesDataset(Dataset):
     def __init__(self,img_list_path,dataset_root_path="/dataset/human_attribute/",transform=None):
         self.img_list_path = img_list_path
         self.transform = transform
@@ -32,3 +40,18 @@ class MNISTDataset(Dataset):
             img = self.transform(img)
         label = torch.LongTensor([label]) #要求必须是longtensor 不能是floattensor
         return img,label.squeeze()
+
+
+##此为测试文件
+if __name__ =="__main__":
+    train_dataset = DogsDataset("/home/dataset/dogs-in-the-wild/annotation/train.txt",
+                                 transforms.Compose([Resize(256),Flip(),RandomCrop(227,"train")]))
+    for i in range(len(train_dataset)):
+        image,label = train_dataset[i]
+        if i == 10:
+            print type(image)
+            #print image.shape
+            plt.figure("image")
+            plt.imshow(image[10])
+            #print image[0]
+            plt.show()

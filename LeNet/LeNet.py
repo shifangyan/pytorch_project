@@ -33,4 +33,3 @@ class LeNet(nn.Module):
 
         return x
 
-
